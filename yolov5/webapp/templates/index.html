@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhận Diện Biển Báo Giao Thông - YOLOv5</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-camera {
+            width: 100%;
+            margin-top: 0;
+        }
+
+        .result-area {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .result-image {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+
+        .camera-stream {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background: #000;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-stream img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .camera-placeholder {
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        .file-name {
+            color: #667eea;
+            font-weight: bold;
+            margin-top: 15px;
+            word-break: break-all;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+        /* Bắt đầu CSS MỚI CHO THÔNG BÁO CHI TIẾT */
+        .detection-details {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background-color: #f0f8ff; 
+            border-radius: 8px;
+            text-align: left;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .details-header {
+            color: #004085;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #b8daff;
+            padding-bottom: 5px;
+        }
+
+        .details-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .details-list li {
+            margin-bottom: 12px;
+            line-height: 1.4;
+            padding: 5px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+        .code-value {
+            font-weight: bold;
+            color: #dc3545; /* Màu đỏ */
+        }
+
+        .meaning-value {
+            font-weight: bold;
+            color: #28a745; /* Màu xanh lá */
+        }
+        /* Kết thúc CSS MỚI */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚦 Nhận Diện Biển Báo Giao Thông</h1>
+            <p>Sử dụng YOLOv5 cho nhận diện biển báo tự động</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>📤 Upload Ảnh/Video</h2>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('image')">Ảnh</button>
+                    <button class="tab" onclick="switchTab('video')">Video</button>
+                </div>
+
+                <div id="image-tab" class="tab-content active">
+                    <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+                        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                            <div class="upload-icon">📷</div>
+                            <p>Nhấp hoặc kéo thả ảnh vào đây</p>
+                            <p style="color: #999; font-size: 0.9em; margin-top: 10px;">Hỗ trợ: JPG, PNG, JPEG</p>
+                        </div>
+                        <input type="file" id="file-input" name="file" class="file-input" accept="image/*" onchange="handleFileSelect(this)" required>
+                        <div class="file-name" id="file-name"></div>
+                        <button type="submit" class="btn">🔍 Phát Hiện Biển Báo</button>
+                    </form>
+                </div>
+
+                <div id="video-tab" class="tab-content">
+                    <form id="video-form" action="/upload" method="POST" enctype="multipart/form-data">
+                        <div class="upload-area" onclick="document.getElementById('video-input').click()">
+                            <div class="upload-icon">🎥</div>
+                            <p>Nhấp hoặc kéo thả video vào đây</p>
+                            <p style="color: #999; font-size: 0.9em; margin-top: 10px;">Hỗ trợ: MP4, AVI, MOV</p>
+                        </div>
+                        <input type="file" id="video-input" name="file" class="file-input" accept="video/*" onchange="handleFileSelect(this)" required>
+                        <div class="file-name" id="video-name"></div>
+                        <button type="submit" class="btn">🔍 Phát Hiện Biển Báo</button>
+                    </form>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px; color: #667eea;">Đang xử lý...</p>
+                </div>
+
+                <div class="result-area">
+                    {% if error %}
+                    <div style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 10px; margin-top: 20px;">
+                        ❌ {{ error }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if result_image %}
+                    <h3 style="color: #667eea; margin-bottom: 15px;">✅ Kết Quả Ảnh</h3>
+                    <img src="{{ url_for('static', filename=result_image) }}" class="result-image" alt="Kết quả">
+                    {% endif %}
+                    
+                    {% if result_video %}
+                    <h3 style="color: #667eea; margin-bottom: 15px;">🎬 Kết Quả Video</h3>
+                    <video width="100%" height="auto" controls class="result-image" style="max-height: 500px;">
+                        <source src="{{ url_for('static', filename=result_video) }}" type="video/mp4">
+                        Trình duyệt của bạn không hỗ trợ video.
+                    </video>
+                    {% endif %}
+
+                    {% if detections_list %}
+                    <div class="detection-details">
+                        <h3 class="details-header">🔍 Chi tiết các Biển báo được Nhận diện:</h3>
+                        <ul class="details-list">
+                            {% for det in detections_list %}
+                            <li>
+                                <span class="code-label">Mã hiệu:</span> 
+                                <span class="code-value">{{ det.code }}</span> (Độ tin cậy: {{ (det.confidence * 100) | round }}%)
+                                <br>
+                                <span class="meaning-label">Ý nghĩa:</span> 
+                                <span class="meaning-value">{{ det.class }}</span> 
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                </div>
+
+            <div class="card">
+                <h2>📹 Camera Trực Tiếp</h2>
+                <div class="camera-stream" id="camera-display">
+                    <p class="camera-placeholder">Nhấn "Bật Camera" để bắt đầu</p>
+                </div>
+                <div class="camera-controls">
+                    <button class="btn btn-camera" onclick="startCamera()">▶️ Bật Camera</button>
+                    <button class="btn btn-camera" onclick="stopCamera()">⏹️ Tắt Camera</button>
+                </div>
+                <div class="info-box">
+                    <strong>💡 Lưu ý:</strong> Camera sẽ tự động nhận diện biển báo theo thời gian thực
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>ℹ️ Hướng Dẫn Sử Dụng</h2>
+            <ol style="line-height: 2; color: #555;">
+                <li><strong>Upload Ảnh:</strong> Chọn tab "Ảnh", tải ảnh lên và nhấn "Phát Hiện Biển Báo"</li>
+                <li><strong>Upload Video:</strong> Chọn tab "Video", tải video lên để xử lý</li>
+                <li><strong>Camera:</strong> Nhấn "Bật Camera" để sử dụng webcam nhận diện trực tiếp</li>
+                <li><strong>Kết quả:</strong> Các biển báo được phát hiện sẽ được khoanh vùng với nhãn và độ tin cậy</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let cameraActive = false;
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active class to selected tab
+            // Check if event exists before accessing it
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Fallback for direct function call (if needed)
+                document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            }
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        function handleFileSelect(input) {
+            const fileName = input.files[0]?.name;
+            // Determine which display element to use based on input id
+            const fileNameDisplay = input.id === 'file-input' ? document.getElementById('file-name') : document.getElementById('video-name');
+            if (fileName) {
+                fileNameDisplay.textContent = '📄 ' + fileName;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        }
+
+        // Drag and drop functionality
+        const uploadAreas = document.querySelectorAll('.upload-area');
+        uploadAreas.forEach(area => {
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('dragover');
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                const input = area.parentElement.querySelector('.file-input');
+                input.files = e.dataTransfer.files;
+                handleFileSelect(input);
+            });
+        });
+
+        // Show loading on form submit
+        document.getElementById('upload-form').addEventListener('submit', () => {
+            // Only show loading if a file is selected (since we added 'required' but for safety)
+            if(document.getElementById('file-input').files.length > 0) {
+                document.getElementById('loading').classList.add('show');
+            }
+        });
+
+        document.getElementById('video-form').addEventListener('submit', () => {
+            // Only show loading if a file is selected
+            if(document.getElementById('video-input').files.length > 0) {
+                document.getElementById('loading').classList.add('show');
+            }
+        });
+
+        function startCamera() {
+            if (!cameraActive) {
+                const cameraDisplay = document.getElementById('camera-display');
+                // Giả định rằng /video_feed là endpoint stream camera
+                cameraDisplay.innerHTML = '<img src="/video_feed" alt="Camera Feed">';
+                cameraActive = true;
+            }
+        }
+
+        function stopCamera() {
+            if (cameraActive) {
+                const cameraDisplay = document.getElementById('camera-display');
+                // Tắt stream bằng cách xóa thẻ img và hiển thị placeholder
+                cameraDisplay.innerHTML = '<p class="camera-placeholder">Camera đã tắt</p>';
+                cameraActive = false;
+            }
+        }
+    </script>
+</body>
+</html>

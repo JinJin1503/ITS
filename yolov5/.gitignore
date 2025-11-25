@@ -1,0 +1,20 @@
+# Loai tru cac tap media lon
+*.mp4
+
+# Loai tru cac tap tin moi truong ao
+*env/
+yolov5/yolov5env/
+
+# === Cac loai tru bo sung cho Python/YOLOv5 ===
+
+# Cac tap tin cache cua Python
+__pycache__/
+*.pyc
+
+# Cac tap tin nhat ky (logs)
+*.log
+runs/
+
+# Cac tap tin trong so mo hinh (RAT QUAN TRONG neu chung nang)
+*.pt
+*.pth
