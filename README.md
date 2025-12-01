@@ -38,7 +38,7 @@ pip install -r requirements.txt
 Bước 4: Tải Trọng số Mô hình
 Mô hình được cấu hình để tải tệp trọng số best_fixed.pt từ đường dẫn:
 MODEL_PATH = "D:/ITS/yolov5/best_fixed.pt" 
-Tải tệp best_fixed.pt của mô hình đã huấn luyện (Lưu ý: Tệp này không có trên GitHub do đã được loại trừ bằng .gitignore).
+Tải tệp best_fixed.pt của mô hình đã huấn luyện ( Lưu ý: Tệp này có trên https://drive.google.com/drive/folders/1ywfVyoVGDryjbniQIf4qBq-7eZ3e2_kl?usp=sharing).
 Đặt tệp này vào thư mục: D:/ITS/yolov5/
 
 📁 Cấu trúc dự án
