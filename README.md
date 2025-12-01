@@ -36,7 +36,6 @@ Tạo tệp requirements.txt bằng lệnh sau (để lấy danh sách thư vi�
 Giả định bạn đã tạo file requirements.txt
 pip install -r requirements.txt
 Bước 4: Mô hình sử dụng tệp trọng số best_fixed.pt để chạy nhận diện. Tệp trọng số không được lưu trực tiếp trong GitHub (do dung lượng lớn) và đã được tải lên Google Drive (https://drive.google.com/drive/folders/1ywfVyoVGDryjbniQIf4qBq-7eZ3e2_kl?usp=sharing ). Sau khi tải về, đặt file vào thư mục: /yolov5/. Chỉnh sửa MODEL_PATH trong code để trỏ đúng tới file trọng số của bạn.
-MODEL_PATH = "yolov5/best_fixed.pt"
 
 📁 Cấu trúc dự án
 Đây là cấu trúc cơ bản cần thiết để chạy ứng dụng:
