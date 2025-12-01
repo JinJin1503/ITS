@@ -36,10 +36,23 @@ Tạo tệp requirements.txt bằng lệnh sau (để lấy danh sách thư vi�
 Giả định bạn đã tạo file requirements.txt
 pip install -r requirements.txt
 Bước 4: Tải Trọng số Mô hình
-Mô hình được cấu hình để tải tệp trọng số best_fixed.pt từ đường dẫn:
-MODEL_PATH = "D:/ITS/yolov5/best_fixed.pt" 
-Tải tệp best_fixed.pt của mô hình đã huấn luyện ( Lưu ý: Tệp này có trên https://drive.google.com/drive/folders/1ywfVyoVGDryjbniQIf4qBq-7eZ3e2_kl?usp=sharing).
-Đặt tệp này vào thư mục: D:/ITS/yolov5/
+
+Mô hình sử dụng tệp trọng số best_fixed.pt để chạy nhận diện.
+
+Tệp trọng số không được lưu trực tiếp trong GitHub (do dung lượng lớn) và đã được tải lên Google Drive.
+
+👉 Tải trọng số tại đây:https://drive.google.com/drive/folders/1ywfVyoVGDryjbniQIf4qBq-7eZ3e2_kl?usp=sharing
+
+Sau khi tải về, đặt file vào đúng vị trí:
+
+ITS/
+ └── yolov5/
+      └── best_fixed.pt
+
+
+Ứng dụng đang dùng đường nó dẫn:
+
+MODEL_PATH = "yolov5/best_fixed.pt"
 
 📁 Cấu trúc dự án
 Đây là cấu trúc cơ bản cần thiết để chạy ứng dụng:
